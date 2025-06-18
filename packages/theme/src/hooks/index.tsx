@@ -60,13 +60,15 @@ export const ThemeContextProvider = (props: { children: React.ReactNode }) => {
 	 */
 	const handleColorSchemeChange = useCallback(
 		(event: MediaQueryList) => {
-			if (event.matches) {
-				setThemeState(ThemeEnum.DARK);
-				document.body.classList.add(DARK_CLASS_NAME);
-			} else {
-				setThemeState(ThemeEnum.LIGHT);
-				document.body.classList.remove(DARK_CLASS_NAME);
-			}
+			// if (event.matches) {
+			// 	setThemeState(ThemeEnum.DARK);
+			// 	document.body.classList.add(DARK_CLASS_NAME);
+			// } else {
+			// 	setThemeState(ThemeEnum.LIGHT);
+			// 	document.body.classList.remove(DARK_CLASS_NAME);
+			// }
+			setThemeState(ThemeEnum.LIGHT);
+			document.body.classList.remove(DARK_CLASS_NAME);
 		},
 		[setThemeState],
 	);
