@@ -68,7 +68,7 @@ export default function MapLayout() {
 	}
 
 	return (
-		<div className="w-full h-screen flex flex-col overflow-hidden bg-theme-bg" style={{ width: '28.5vw', }} >
+		<div className="w-full h-screen flex flex-col overflow-hidden bg-theme-bg" style={{ width: '28.5vw',padding: '10px',backgroundColor: '#fff',borderWidth: '1px',borderStyle: 'solid',borderColor: '#F4F5F6' }} >
 			{/* 主要内容区域 */}
 			<div className="flex-1 overflow-hidden flex bg-theme-main-bg" style={{ borderRadius: '14px', }}>
 				<AMapComponent
