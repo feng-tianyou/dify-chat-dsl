@@ -164,3 +164,22 @@ a {
 .dark::-webkit-scrollbar-thumb:hover {
 	background-color: #777;
 }
+
+/* 隐藏高德地图 logo 和版权信息 */
+.amap-logo {
+	display: none !important;
+}
+
+.amap-copyright {
+	display: none !important;
+}
+
+/* 隐藏高德地图的其他品牌元素 */
+.amap-brand {
+	display: none !important;
+}
+
+/* 隐藏高德地图的缩放控件中的品牌信息 */
+.amap-zoomcontrol .amap-brand {
+	display: none !important;
+}

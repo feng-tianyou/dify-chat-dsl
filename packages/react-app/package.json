@@ -11,6 +11,7 @@
 	},
 	"packageManager": "pnpm@10.8.1",
 	"dependencies": {
+		"@amap/amap-jsapi-loader": "^1.0.1",
 		"@ant-design/cssinjs": "catalog:",
 		"@ant-design/icons": "catalog:",
 		"@ant-design/x": "catalog:",

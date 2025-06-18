@@ -33,6 +33,7 @@ import { DEFAULT_CONVERSATION_NAME } from '@/constants'
 import { useLatest } from '@/hooks/use-latest'
 
 import HeaderLayout from './header'
+import MapLayout from '@/layout/map-layout'
 
 interface IChatLayoutProps {
 	/**
@@ -488,6 +489,7 @@ export default function ChatLayout(props: IChatLayoutProps) {
 									conversationItemsChangeCallback={() => getConversationItems(false)}
 								/>
 							</div>
+							<MapLayout />
 						</>
 					) : (
 						<div className="w-full h-full flex items-center justify-center">
