@@ -2,7 +2,7 @@
 	"name": "@dify-chat/core",
 	"version": "0.3.0",
 	"type": "module",
-	"description": "Dify Chat 的核心包",
+	"description": "门店选址决策助手",
 	"author": {
 		"name": "lexmin0412",
 		"email": "zhangle_dev@outlook.com",
