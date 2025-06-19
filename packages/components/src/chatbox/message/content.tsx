@@ -29,6 +29,8 @@ interface IMessageContentProps {
 	messageItem: IMessageItem4Render
 }
 
+import { applyStringReplacements } from './string-replacements'
+
 /**
  * 消息内容展示组件
  */
@@ -51,20 +53,31 @@ export default function MessageContent(props: IMessageContentProps) {
 
 	const computedContent = useMemo(() => {
 		const likelyJSON = content.startsWith('{') && content.endsWith('}')
+		let processedContent = content
+		
 		// 处理回复表单的自动生成消息
 		if (role === Roles.LOCAL || (role === Roles.USER && likelyJSON)) {
 			if (currentApp?.config.answerForm?.enabled && currentApp.config.answerForm?.feedbackText) {
 				// 尝试通过 json 解析
 				try {
 					const parsedValue = JSON.parse(content)
-					return parsedValue.isFormSubmit ? currentApp.config.answerForm?.feedbackText : content
+					processedContent = parsedValue.isFormSubmit ? currentApp.config.answerForm?.feedbackText : content
 				} catch (error) {
 					console.log('computedContent json 解析失败', error)
-					return content
+					processedContent = content
 				}
 			}
 		}
-		return content
+		
+		// 应用自定义字符串替换
+		// 根据消息角色应用相应的替换规则
+		if (role === Roles.AI) {
+			processedContent = applyStringReplacements(processedContent, 'ai')
+		} else if (role === Roles.USER || role === Roles.LOCAL) {
+			processedContent = applyStringReplacements(processedContent, 'user')
+		}
+		
+		return processedContent
 	}, [content, currentApp?.config?.answerForm, role])
 
 	// 如果是错误状态，则直接展示错误信息
@@ -141,3 +154,4 @@ export default function MessageContent(props: IMessageContentProps) {
 		</>
 	)
 }
+
