@@ -1,8 +1,8 @@
 import { Button, message, } from 'antd'
-import { forwardRef, memo, useCallback, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, memo, useCallback, useRef, useState, useEffect, } from 'react'
 
 import AMapComponent from '@/components/amap-component'
-import { IMapConfig, IMapMarker } from '@/types'
+import { IMapConfig, IPoi } from '@/types'
 
 import './map-layout.css'
 
@@ -11,7 +11,10 @@ export interface MapLayoutRef {
 }
 
 interface MapLayoutProps {
-	// 可以添加其他 props
+	// 待用户点击确定的选址地址
+	needConfirmAddress?: string,
+	// 回调函数，通知父亲组件发送确认选址的信息
+	onSendConfirmAddress: (poi: IPoi) => void
 }
 
 /**
@@ -28,15 +31,24 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 
 	const mapInstanceRef = useRef<any>(null)
 
-	const [showConfign, setShowConfign] = useState<boolean>(false)
+	const [showConfirm, setShowConfirm] = useState<boolean>(false)
 
-	// const [poiInstance, setPoiInstance] = useState<IMapConfig>({
-	// 	apiKey: 'b228b9ebcb41e5a9320bcfc45ad0b5c8', // 需要用户提供高德地图 API Key
-	// 	containerId: 'amap-container',
-	// 	center: [113.203299, 23.073685], // 默认大参林副中心
-	// 	zoom: 11,
-	// 	mapStyle: 'amap://styles/light',
-	// })
+	/**
+	 * 当前地图选择的位置信息
+	 * 地址、经纬度
+	 */
+	const [poiInstance, setPoiInstance] = useState<IPoi>({
+		address: '',
+		lng: 113.203299, 
+		lat: 23.073685,
+	})
+
+	useEffect(() => {
+		console.log('---外部待确认地址发生变化---')
+		if(props.needConfirmAddress && props.needConfirmAddress != '') {
+			addAddressToMap(props.needConfirmAddress)
+		}
+	}, [props]);
 
 	/**
 	 * 处理地图加载完成
@@ -57,10 +69,10 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 	/**
 	 * 点击确认地址弹窗
 	 */
-	const onConfign = () => {
-		setShowConfign(false)
+	const onConfirm = () => {
+		setShowConfirm(false)
 		// todo, 调用外部发送信息函数，发送提问: 帮我进行门店选址，地址是：xxx，经纬度是：xxx。
-
+		props.onSendConfirmAddress(poiInstance)
 	}
 
 	/**
@@ -97,13 +109,16 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 		geocoder.getAddress([lng, lat], (status: string, result: any) => {
 			console.log('逆地理编码结果:', status, result)
 			if (status === 'complete' && result.info === 'OK') {
-				const address =
-					result.regeocode.addressComponent.street + result.regeocode.addressComponent.streetNumber
-				console.log('地址描述:', address)
+				let address = ''
+				if(result.regeocode.addressComponent.street == '') {
+					address = result.regeocode.formattedAddress
+				} else {
+					address = result.regeocode.addressComponent.city + result.regeocode.addressComponent.street + result.regeocode.addressComponent.streetNumber
+				}
 				// 添加poi标识到地图
 				onConfigPoi(address, lng, lat)
 				// 显示确认选址弹窗
-				setShowConfign(true)
+				setShowConfirm(true)
 			}
 		})
 	}
@@ -120,6 +135,11 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 
 			try {
 				console.log('---调用添加poi点---')
+				setPoiInstance({
+					address: address,
+					lng: longitude,
+					lat: latitude,
+				})
 				// 清除之前的圆环、marker
 				mapInstanceRef.current.clearMap()
 				// 地图居中到指定位置
@@ -171,15 +191,6 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 		[mapInstanceRef.current],
 	)
 
-	// 暴露方法给父组件
-	useImperativeHandle(
-		ref,
-		() => ({
-			onConfigPoi,
-		}),
-		[onConfigPoi],
-	)
-
 	return (
 		<div
 			className="w-full h-full flex flex-col overflow-hidden bg-theme-bg"
@@ -204,10 +215,10 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 					className="w-full h-full"
 				/>
 				{/* 确认弹窗 */}
-				{showConfign && <div className="popup-confign-content">
+				{showConfirm && <div className="popup-confign-content">
 					<span>上面的地址是否是你属意的门店选址地址？</span>
 					<span>拖动地图点击任何一处可以切换新地址。</span>
-					<Button type="primary" autoInsertSpace={false} onClick={onConfign}>确定</Button>
+					<Button type="primary" autoInsertSpace={false} onClick={onConfirm}>确定</Button>
 				</div>}
 			</div>
 		</div>
