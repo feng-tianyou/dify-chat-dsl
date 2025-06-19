@@ -170,6 +170,7 @@ export const Chatbox = (props: ChatboxProps) => {
 						<MessageContent
 							onSubmit={onSubmit}
 							messageItem={messageItem}
+							isRequesting={isRequesting}
 						/>
 					)
 				},

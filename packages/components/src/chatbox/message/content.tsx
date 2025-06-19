@@ -5,10 +5,12 @@ import { Tooltip } from 'antd'
 import { useMemo } from 'react'
 
 import { MarkdownRenderer } from '../../markdown-renderer'
+import { MessageStatusProvider } from '../../markdown-renderer/blocks/think-block'
 import ThoughtChain from '../thought-chain'
 import MessageFileList from './file-list'
 import MessageReferrence from './referrence'
 import WorkflowLogs from './workflow-logs'
+import { applyStringReplacements } from './string-replacements'
 
 interface IMessageContentProps {
 	/**
@@ -27,9 +29,11 @@ interface IMessageContentProps {
 	 * 消息数据对象
 	 */
 	messageItem: IMessageItem4Render
+	/**
+	 * 是否正在请求中（可选，用于传递给深度思考组件）
+	 */
+	isRequesting?: boolean
 }
-
-import { applyStringReplacements } from './string-replacements'
 
 /**
  * 消息内容展示组件
@@ -37,6 +41,7 @@ import { applyStringReplacements } from './string-replacements'
 export default function MessageContent(props: IMessageContentProps) {
 	const {
 		onSubmit,
+		isRequesting = false,
 		messageItem: {
 			id,
 			status,
@@ -118,7 +123,11 @@ export default function MessageContent(props: IMessageContentProps) {
 	) : null
 
 	return (
-		<>
+		<MessageStatusProvider value={{
+			messageStatus: status,
+			isRequesting,
+			isHistory: props.messageItem.isHistory
+		}}>
 			{/* Agent 思维链信息 */}
 			<ThoughtChain
 				uniqueKey={id as string}
@@ -151,7 +160,7 @@ export default function MessageContent(props: IMessageContentProps) {
 
 			{/* 引用链接列表 */}
 			<MessageReferrence items={retrieverResources} />
-		</>
+		</MessageStatusProvider>
 	)
 }
 
