@@ -77,27 +77,19 @@ export interface IMapConfig {
 	mapStyle?: string
 }
 
-export interface IMapMarker {
+export interface IPoi {
 	/**
-	 * 标记点 ID
+	 * 标记点地址
 	 */
-	id: string
+	address: string
 	/**
-	 * 标记点坐标
+	 * 标记点经度
 	 */
-	position: [number, number]
+	lng: number,
 	/**
-	 * 标记点标题
+	 * 标记点纬度
 	 */
-	title?: string
-	/**
-	 * 标记点内容
-	 */
-	content?: string
-	/**
-	 * 标记点图标
-	 */
-	icon?: string
+	lat: number,
 }
 
 export interface IMapComponentProps {
@@ -106,17 +98,9 @@ export interface IMapComponentProps {
 	 */
 	config: IMapConfig
 	/**
-	 * 标记点列表
-	 */
-	markers?: IMapMarker[]
-	/**
 	 * 地图加载完成回调
 	 */
 	onMapLoaded?: (map: any) => void
-	/**
-	 * 标记点点击回调
-	 */
-	onMarkerClick?: (marker: IMapMarker) => void
 	/**
 	 * 地图点击回调
 	 */

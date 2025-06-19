@@ -25,13 +25,14 @@ import {
 } from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'pure-react-router'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useRef, } from 'react'
 
-import ChatboxWrapper from '@/components/chatbox-wrapper'
+import {ChatboxWrapper} from '@/components/chatbox-wrapper'
 import { DEFAULT_CONVERSATION_NAME } from '@/constants'
 import { useLatest } from '@/hooks/use-latest'
 
 import MapLayout from '@/layout/map-layout'
+import { IPoi, } from '@/types'
 
 interface IChatLayoutProps {
 	/**
@@ -73,6 +74,12 @@ export default function ChatLayout(props: IChatLayoutProps) {
 	const searchParams = useSearchParams()
 	const [conversationListLoading, setCoversationListLoading] = useState<boolean>(false)
 	const latestCurrentConversationId = useLatest(currentConversationId)
+
+	const chatboxRef = useRef();
+
+	// 用户的待确认选址地址,会传递给地图，地图显示该地址并显示确认弹窗
+	// 如使用 setNeedConfirmAddress('广州沙园')
+	const [needConfirmAddress, setNeedConfirmAddress] = useState<string>('')
 
 	useEffect(() => {
 		if (!currentApp?.config) {
@@ -483,6 +490,7 @@ export default function ChatLayout(props: IChatLayoutProps) {
 								{/* 聊天窗口 */}
 								<div className="flex-1 min-w-0 flex flex-col overflow-hidden">
 									<ChatboxWrapper
+										ref={chatboxRef}
 										difyApi={difyApi}
 										conversationListLoading={conversationListLoading}
 										onAddConversation={onAddConversation}
@@ -491,7 +499,14 @@ export default function ChatLayout(props: IChatLayoutProps) {
 								</div>
 								{/* 地图组件 */}
 								<div className="flex-shrink-0" style={{ width: '28.5vw' }}>
-									<MapLayout />
+									<MapLayout needConfirmAddress={needConfirmAddress} onSendConfirmAddress={(poi: IPoi) => {
+										// todo,这里发送信息
+										if (chatboxRef.current) {
+											chatboxRef.current.onSubmit(
+												`帮我进行门店选址，地址是：${poi.address}，经纬度是：${poi.lng},${poi.lat}。`
+											);
+										}
+									}}/>
 								</div>
 							</div>
 						</>

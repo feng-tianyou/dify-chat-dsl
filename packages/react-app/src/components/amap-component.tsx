@@ -26,12 +26,14 @@ export default function AMapComponent(props: IMapComponentProps) {
 			try {
 				setIsLoading(true)
 				setError(null)
-
+				window._AMapSecurityConfig = {
+					securityJsCode:'20054b23edebcf0cce2f0df0e50489f7',
+			  }
 				// 加载高德地图 API
 				const AMap = await AMapLoader.load({
 					key: config.apiKey,
 					version: '2.0',
-					plugins: ['AMap.Geolocation', 'AMap.Scale', 'AMap.ToolBar']
+					plugins: ['AMap.Geolocation', 'AMap.Scale', 'AMap.ToolBar', 'AMap.Geocoder']
 				})
 
 				// 创建地图实例

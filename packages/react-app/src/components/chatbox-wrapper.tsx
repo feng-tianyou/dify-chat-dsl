@@ -7,7 +7,7 @@ import { Roles, useConversationsContext } from '@dify-chat/core'
 import { isTempId } from '@dify-chat/helpers'
 import { Button, Empty, Form, GetProp, Spin } from 'antd'
 import dayjs from 'dayjs'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, forwardRef, useImperativeHandle, } from 'react'
 
 import { useLatest } from '@/hooks/use-latest'
 import { useX } from '@/hooks/useX'
@@ -39,7 +39,8 @@ interface IChatboxWrapperProps {
 /**
  * 聊天容器 进入此组件时, 应保证应用信息和对话列表已经加载完成
  */
-export default function ChatboxWrapper(props: IChatboxWrapperProps) {
+// export default function ChatboxWrapper(props: IChatboxWrapperProps) {
+export const ChatboxWrapper = forwardRef((props: IChatboxWrapperProps, ref) => {
 	const {
 		difyApi,
 		conversationListLoading,
@@ -254,6 +255,11 @@ export default function ChatboxWrapper(props: IChatboxWrapperProps) {
 		[onRequest],
 	)
 
+	// 暴露 onSubmit 给父组件
+	useImperativeHandle(ref, () => ({
+		onSubmit,
+	}));
+
 	// 格式化用户输入的内容
 	const formatNextContent = (nextContent: string) => {
 		console.log('options===============', nextContent)
@@ -369,4 +375,4 @@ export default function ChatboxWrapper(props: IChatboxWrapperProps) {
 			</div>
 		</div>
 	)
-}
+})
