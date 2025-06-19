@@ -258,6 +258,7 @@ export const MessageSender = (props: IMessageSenderProps) => {
 			header={senderHeader}
 			value={content}
 			onChange={onChange}
+			placeholder="请输入内容"
 			prefix={
 				enableFileUpload ? (
 					// 附件上传按钮

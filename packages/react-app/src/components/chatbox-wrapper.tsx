@@ -245,6 +245,7 @@ export default function ChatboxWrapper(props: IChatboxWrapperProps) {
 	const onSubmit = useCallback(
 		(nextContent: string, options?: { files?: IFile[]; inputs?: Record<string, unknown> }) => {
 			filesRef.current = options?.files || []
+			nextContent = formatNextContent(nextContent)
 			onRequest({
 				content: nextContent,
 				files: options?.files as IMessageFileItem[],
@@ -252,6 +253,19 @@ export default function ChatboxWrapper(props: IChatboxWrapperProps) {
 		},
 		[onRequest],
 	)
+
+	// 格式化用户输入的内容
+	const formatNextContent = (nextContent: string) => {
+		console.log('options===============', nextContent)
+		//请识别用户问题是否有包含地址:
+		let nextContentResult = `请识别用户问题是否有包含地址:${nextContent}`
+		if (nextContent.indexOf('帮我进行门店选址') != -1) {
+			// 已经确定了具体的地址
+			return nextContent
+		} else {
+			return nextContentResult
+		}
+	}
 
 	const unStoredMessages4Render = useMemo(() => {
 		return messages.map(item => {
