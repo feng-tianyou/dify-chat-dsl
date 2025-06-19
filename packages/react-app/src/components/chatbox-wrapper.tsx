@@ -38,6 +38,7 @@ interface IChatboxWrapperProps {
 	 * 触发配置应用事件
 	 */
 	handleStartConfig?: () => void
+	onSendConfirmAddress: (message: any) => void
 	/**
 	 * 辅助API配置（可选）
 	 */
@@ -60,6 +61,7 @@ export const ChatboxWrapper = forwardRef<{ onSubmit: (content: string, options?:
 		conversationItemsChangeCallback,
 		handleStartConfig,
 		auxiliaryConfig,
+		onSendConfirmAddress,
 	} = props
 	const {
 		currentConversationId,
@@ -126,7 +128,7 @@ export const ChatboxWrapper = forwardRef<{ onSubmit: (content: string, options?:
 		const unsubscribeMessage = onMessage(async (message) => {
 			// TODO: 这里调用地图方法将地址信息传给地图组件
 			console.log('🚀 准备发送辅助消息返回结果:', message)
-
+			props.onSendConfirmAddress(message)
 
 			// 设置当前消息并显示弹窗
 			// setCurrentAuxiliaryMessage({

@@ -500,6 +500,10 @@ export default function ChatLayout(props: IChatLayoutProps) {
 																<ChatboxWrapper
 								ref={chatboxRef}
 								difyApi={difyApi}
+								onSendConfirmAddress={(message) => {
+									console.log('🚀 ---123123准备发送辅助分析:', message)
+									setNeedConfirmAddress(message.content)
+								}}
 								conversationListLoading={conversationListLoading}
 								onAddConversation={onAddConversation}
 								conversationItemsChangeCallback={() => getConversationItems(false)}
