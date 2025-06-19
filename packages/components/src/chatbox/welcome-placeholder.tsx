@@ -58,15 +58,29 @@ export const WelcomePlaceholder = (props: IWelcomePlaceholderProps) => {
 	const { currentApp } = useAppContext()
 
 	const placeholderPromptsItems: GetProp<typeof Prompts, 'items'> = useMemo(() => {
-		if (currentApp?.parameters?.suggested_questions?.length) {
+		// 写死的开场建议问题 - 临时禁用以排查问题
+		const defaultSuggestions: string[] = [
+			'你好，请介绍一下你自己',
+			'你能帮我做什么？',
+			'请告诉我你的功能特点',
+			'如何使用你的服务？',
+			'你有什么特别的能力吗？'
+		]
+
+		// 优先使用写死的问题，如果需要也可以保留原有的动态问题作为备选
+		const suggestions = defaultSuggestions.length > 0 
+			? defaultSuggestions 
+			: (currentApp?.parameters?.suggested_questions || [])
+
+		if (suggestions.length > 0) {
 			// 开场白标题
-			const suggestedTitle = currentApp?.parameters?.opening_statement || 'Hot Topics'
+			const suggestedTitle = currentApp?.parameters?.opening_statement || '推荐问题'
 			return [
 				{
 					key: 'suggested_question',
 					label: renderTitle(<FireOutlined style={{ color: '#FF4D4F' }} />, suggestedTitle),
 					description: '',
-					children: currentApp.parameters.suggested_questions.map((item, index) => {
+					children: suggestions.map((item, index) => {
 						return {
 							key: `suggested_question-${index}`,
 							description: item,
@@ -84,7 +98,7 @@ export const WelcomePlaceholder = (props: IWelcomePlaceholderProps) => {
 				size={12}
 				direction="vertical"
 				className={classNames({
-					'w-full md:!w-3/4': true,
+					'w-full max-w-4xl': true,
 					'pb-6': !showPrompts && currentApp?.parameters.user_input_form?.length,
 					'pt-3': showPrompts,
 				})}
@@ -141,8 +155,12 @@ export const WelcomePlaceholder = (props: IWelcomePlaceholderProps) => {
 									},
 						}}
 						onItemClick={async (...params) => {
+							console.log('🔥 推荐问题被点击了:', params)
+							console.log('🔥 点击的问题内容:', params[0]?.data?.description)
+							console.trace('🔥 调用堆栈:')
 							validateAndGenErrMsgs(props.entryForm).then(res => {
 								if (res.isSuccess) {
+									console.log('🔥 表单验证成功，即将发送消息')
 									onPromptItemClick(...params)
 								} else {
 									message.error(res.errMsgs)

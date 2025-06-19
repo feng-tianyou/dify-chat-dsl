@@ -5,10 +5,12 @@ import { Tooltip } from 'antd'
 import { useMemo } from 'react'
 
 import { MarkdownRenderer } from '../../markdown-renderer'
+import { MessageStatusProvider } from '../../markdown-renderer/blocks/think-block'
 import ThoughtChain from '../thought-chain'
 import MessageFileList from './file-list'
 import MessageReferrence from './referrence'
 import WorkflowLogs from './workflow-logs'
+import { applyStringReplacements } from './string-replacements'
 
 interface IMessageContentProps {
 	/**
@@ -27,6 +29,10 @@ interface IMessageContentProps {
 	 * 消息数据对象
 	 */
 	messageItem: IMessageItem4Render
+	/**
+	 * 是否正在请求中（可选，用于传递给深度思考组件）
+	 */
+	isRequesting?: boolean
 }
 
 /**
@@ -35,6 +41,7 @@ interface IMessageContentProps {
 export default function MessageContent(props: IMessageContentProps) {
 	const {
 		onSubmit,
+		isRequesting = false,
 		messageItem: {
 			id,
 			status,
@@ -51,20 +58,31 @@ export default function MessageContent(props: IMessageContentProps) {
 
 	const computedContent = useMemo(() => {
 		const likelyJSON = content.startsWith('{') && content.endsWith('}')
+		let processedContent = content
+		
 		// 处理回复表单的自动生成消息
 		if (role === Roles.LOCAL || (role === Roles.USER && likelyJSON)) {
 			if (currentApp?.config.answerForm?.enabled && currentApp.config.answerForm?.feedbackText) {
 				// 尝试通过 json 解析
 				try {
 					const parsedValue = JSON.parse(content)
-					return parsedValue.isFormSubmit ? currentApp.config.answerForm?.feedbackText : content
+					processedContent = parsedValue.isFormSubmit ? currentApp.config.answerForm?.feedbackText : content
 				} catch (error) {
 					console.log('computedContent json 解析失败', error)
-					return content
+					processedContent = content
 				}
 			}
 		}
-		return content
+		
+		// 应用自定义字符串替换
+		// 根据消息角色应用相应的替换规则
+		if (role === Roles.AI) {
+			processedContent = applyStringReplacements(processedContent, 'ai')
+		} else if (role === Roles.USER || role === Roles.LOCAL) {
+			processedContent = applyStringReplacements(processedContent, 'user')
+		}
+		
+		return processedContent
 	}, [content, currentApp?.config?.answerForm, role])
 
 	// 如果是错误状态，则直接展示错误信息
@@ -105,7 +123,11 @@ export default function MessageContent(props: IMessageContentProps) {
 	) : null
 
 	return (
-		<>
+		<MessageStatusProvider value={{
+			messageStatus: status,
+			isRequesting,
+			isHistory: props.messageItem.isHistory
+		}}>
 			{/* Agent 思维链信息 */}
 			<ThoughtChain
 				uniqueKey={id as string}
@@ -138,6 +160,7 @@ export default function MessageContent(props: IMessageContentProps) {
 
 			{/* 引用链接列表 */}
 			<MessageReferrence items={retrieverResources} />
-		</>
+		</MessageStatusProvider>
 	)
 }
+

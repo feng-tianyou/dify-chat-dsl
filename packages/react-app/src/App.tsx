@@ -52,10 +52,40 @@ export default function App() {
 			>
 				<DifyChatProvider
 					value={{
-						mode: 'multiApp',
+						mode: 'singleApp',
 						user: userId,
-						// 默认使用 localstorage, 如果需要使用其他存储方式，可以实现 DifyAppStore 接口后传入，异步接口实现参考 src/services/app/restful.ts
-						appService: new DifyAppService(),
+						// 单应用模式下的配置
+						appConfig: {
+							requestConfig: {
+								apiBase: 'http://dify-test-b.dslyy.com/v1', // 你的 Dify API Base
+								apiKey: 'app-d2fkWguAOebHTjHsAxzEa9V9',        // 你的 Dify API Key
+							},
+							// 可选：指定应用类型（如果是聊天类型应用可以不设置）
+							info: {
+								// mode: AppModeEnums.CHATBOT, // 聊天助手
+								// mode: AppModeEnums.CHATFLOW, // 聊天流
+								// mode: AppModeEnums.AGENT,    // 智能体
+								// mode: AppModeEnums.WORKFLOW, // 工作流
+								// mode: AppModeEnums.TEXT_GENERATOR, // 文本生成
+							},
+							// 可选：回复表单配置
+							answerForm: {
+								enabled: false,
+								feedbackText: '我提交了一个表单',
+							},
+							// 可选：输入参数配置
+							inputParams: {
+								enableUpdateAfterCvstStarts: true,
+							},
+							// 可选：开场白配置
+							extConfig: {
+								conversation: {
+									openingStatement: {
+										displayMode: 'always', // 'default' | 'always'
+									},
+								},
+							},
+						},
 					}}
 				>
 					<LayoutIndex />
