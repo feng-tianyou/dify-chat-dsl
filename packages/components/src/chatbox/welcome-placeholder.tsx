@@ -98,7 +98,7 @@ export const WelcomePlaceholder = (props: IWelcomePlaceholderProps) => {
 				size={12}
 				direction="vertical"
 				className={classNames({
-					'w-full md:!w-3/4': true,
+					'w-full max-w-4xl': true,
 					'pb-6': !showPrompts && currentApp?.parameters.user_input_form?.length,
 					'pt-3': showPrompts,
 				})}
@@ -115,8 +115,8 @@ export const WelcomePlaceholder = (props: IWelcomePlaceholderProps) => {
 								/>
 							</div>
 						}
-						title={"Hello, I'm Dify Chat"}
-						description="Base on Dify API, Dify Chat is a web app that can interact with AI."
+						title={"你好，我是门店选址决策助手"}
+						description="问答式选址智能体，功能包括：根据输入的地址，分析商圈人流情况，估算租金/坪效比计算等因素，给出是否建议开店结论"
 						extra={
 							<Space>
 								<Button icon={<ShareAltOutlined />} />

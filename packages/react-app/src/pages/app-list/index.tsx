@@ -9,7 +9,7 @@ import {
 } from '@dify-chat/core'
 import { useIsMobile } from '@dify-chat/helpers'
 import { useRequest } from 'ahooks'
-import { Button, Col, Dropdown, Empty, message, Row } from 'antd'
+import { Button, Col, Dropdown, Empty, message, Row, Space } from 'antd'
 import { useHistory } from 'pure-react-router'
 import { useEffect, useState } from 'react'
 
@@ -64,6 +64,19 @@ export default function AppListPage() {
 				}
 			/>
 			<div className="flex-1 bg-theme-main-bg rounded-3xl py-6 overflow-y-auto box-border overflow-x-hidden">
+				{/* 地图入口 */}
+				<div className="px-3 md:px-6 mb-6">
+					<Button
+						type="primary"
+						size="large"
+						icon={<span className="text-lg">🗺️</span>}
+						onClick={() => history.push('/map')}
+						className="w-full md:w-auto"
+					>
+						高德地图
+					</Button>
+				</div>
+
 				{list?.length ? (
 					<Row
 						gutter={[16, 16]}

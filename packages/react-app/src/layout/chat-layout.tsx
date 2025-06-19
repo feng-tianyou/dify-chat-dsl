@@ -1,6 +1,5 @@
 import {
 	EditOutlined,
-	MenuOutlined,
 	MinusCircleOutlined,
 	PlusCircleOutlined,
 	PlusOutlined,
@@ -32,7 +31,7 @@ import ChatboxWrapper from '@/components/chatbox-wrapper'
 import { DEFAULT_CONVERSATION_NAME } from '@/constants'
 import { useLatest } from '@/hooks/use-latest'
 
-import HeaderLayout from './header'
+import MapLayout from '@/layout/map-layout'
 
 interface IChatLayoutProps {
 	/**
@@ -364,7 +363,7 @@ export default function ChatLayout(props: IChatLayoutProps) {
 		>
 			<div className={`w-full h-screen flex flex-col overflow-hidden bg-theme-bg`}>
 				{/* 头部 */}
-				<HeaderLayout
+				{/* <HeaderLayout
 					title={renderCenterTitle?.(currentApp?.config?.info)}
 					rightIcon={
 						isMobile ? (
@@ -379,7 +378,7 @@ export default function ChatLayout(props: IChatLayoutProps) {
 							</Dropdown>
 						) : null
 					}
-				/>
+				/> */}
 
 				{/* Main */}
 				<div className="flex-1 overflow-hidden flex rounded-t-3xl bg-theme-main-bg">
@@ -479,14 +478,21 @@ export default function ChatLayout(props: IChatLayoutProps) {
 								</div>
 							</div>
 
-							{/* 右侧聊天窗口 - 移动端全屏 */}
-							<div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-								<ChatboxWrapper
-									difyApi={difyApi}
-									conversationListLoading={conversationListLoading}
-									onAddConversation={onAddConversation}
-									conversationItemsChangeCallback={() => getConversationItems(false)}
-								/>
+							{/* 右侧内容区域 - 包含聊天和地图 */}
+							<div className="flex-1 min-w-0 flex overflow-hidden">
+								{/* 聊天窗口 */}
+								<div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+									<ChatboxWrapper
+										difyApi={difyApi}
+										conversationListLoading={conversationListLoading}
+										onAddConversation={onAddConversation}
+										conversationItemsChangeCallback={() => getConversationItems(false)}
+									/>
+								</div>
+								{/* 地图组件 */}
+								<div className="flex-shrink-0" style={{ width: '28.5vw' }}>
+									<MapLayout />
+								</div>
 							</div>
 						</>
 					) : (

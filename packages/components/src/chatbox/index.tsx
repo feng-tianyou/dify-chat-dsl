@@ -263,7 +263,7 @@ export const Chatbox = (props: ChatboxProps) => {
 					uploadFileApi={(...params) => difyApi.uploadFile(...params)}
 				/>
 
-				<div className="flex-1 w-full md:!w-3/4 mx-auto px-3 md:px-0 box-border">
+				<div className="flex-1 w-full max-w-4xl mx-auto px-3 md:px-6 box-border">
 					{/* 🌟 消息列表 */}
 					<Bubble.List
 						items={items}
@@ -273,7 +273,7 @@ export const Chatbox = (props: ChatboxProps) => {
 					{/* 下一步问题建议 当存在消息列表，且非正在对话时才展示 */}
 					{(() => {
 						// TODO: 这里写死的后续建议问题 根据实际情况调整
-						const fixedNextSuggestions = [
+						const fixedNextSuggestions: string[] = [
 							// '还有其他相关问题吗？',
 							// '能详细解释一下吗？',
 							// '有什么实际应用案例？',
@@ -319,7 +319,7 @@ export const Chatbox = (props: ChatboxProps) => {
 				</div>
 
 				<div
-					className="absolute bottom-0 bg-theme-main-bg w-full md:!w-3/4 left-1/2"
+					className="absolute bottom-0 bg-theme-main-bg w-full max-w-4xl left-1/2"
 					style={{
 						transform: 'translateX(-50%)',
 					}}
