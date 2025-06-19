@@ -124,25 +124,29 @@ export const ChatboxWrapper = forwardRef<{ onSubmit: (content: string, options?:
 		if (!auxiliaryConfig) return
 
 		const unsubscribeMessage = onMessage(async (message) => {
+			// TODO: 这里调用地图方法将地址信息传给地图组件
+			console.log('🚀 准备发送辅助消息返回结果:', message)
+
+
 			// 设置当前消息并显示弹窗
-			setCurrentAuxiliaryMessage({
-				query: message.query,
-				content: message.content,
-				timestamp: message.timestamp,
-				conversationId: message.conversationId
-			})
-			setAuxiliaryModalVisible(true)
+			// setCurrentAuxiliaryMessage({
+			// 	query: message.query,
+			// 	content: message.content,
+			// 	timestamp: message.timestamp,
+			// 	conversationId: message.conversationId
+			// })
+			// setAuxiliaryModalVisible(true)
 			
 			// 显示通知提醒
-			notification.info({
-				message: '🤖 辅助分析完成',
-				description: '点击查看完整的AI分析结果',
-				placement: 'topRight',
-				duration: 3,
-				onClick: () => {
-					setAuxiliaryModalVisible(true)
-				}
-			})
+			// notification.info({
+			// 	message: '🤖 辅助分析完成',
+			// 	description: '点击查看完整的AI分析结果',
+			// 	placement: 'topRight',
+			// 	duration: 3,
+			// 	onClick: () => {
+			// 		setAuxiliaryModalVisible(true)
+			// 	}
+			// })
 			
 			// 使用处理器管理器处理消息
 			const results = await auxiliaryMessageProcessor.processMessage(message)
