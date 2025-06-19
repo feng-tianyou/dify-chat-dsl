@@ -271,36 +271,51 @@ export const Chatbox = (props: ChatboxProps) => {
 					/>
 
 					{/* 下一步问题建议 当存在消息列表，且非正在对话时才展示 */}
-					{nextSuggestions?.length && items.length && !isRequesting ? (
-						<div className="p-3 md:pl-[44px] mt-3">
-							<div className="text-desc">🤔 你可能还想问:</div>
-							<div>
-								{nextSuggestions?.map(item => {
-									return (
-										<div
-											key={item}
-											className="mt-3 flex items-center"
-										>
+					{(() => {
+						// TODO: 这里写死的后续建议问题 根据实际情况调整
+						const fixedNextSuggestions = [
+							// '还有其他相关问题吗？',
+							// '能详细解释一下吗？',
+							// '有什么实际应用案例？',
+							// '还有什么需要注意的？'
+						]
+						
+						// 优先使用写死的问题，如果为空则使用API返回的问题
+						const displaySuggestions = fixedNextSuggestions.length > 0 
+							? fixedNextSuggestions 
+							: nextSuggestions
+							
+						return displaySuggestions?.length && items.length && !isRequesting ? (
+							<div className="p-3 md:pl-[44px] mt-3">
+								<div className="text-desc">🤔 你可能还想问:</div>
+								<div>
+									{displaySuggestions?.map(item => {
+										return (
 											<div
-												className="p-2 shrink-0 cursor-pointer rounded-lg flex items-center border border-solid border-theme-border text-sm max-w-full text-theme-desc"
-												onClick={() => {
-													onPromptsItemClick({
-														data: {
-															key: item,
-															description: item,
-														},
-													})
-												}}
+												key={item}
+												className="mt-3 flex items-center"
 											>
-												<span className="truncate">{item}</span>
-												<ArrowRightOutlined className="ml-1" />
+												<div
+													className="p-2 shrink-0 cursor-pointer rounded-lg flex items-center border border-solid border-theme-border text-sm max-w-full text-theme-desc"
+													onClick={() => {
+														onPromptsItemClick({
+															data: {
+																key: item,
+																description: item,
+															},
+														})
+													}}
+												>
+													<span className="truncate">{item}</span>
+													<ArrowRightOutlined className="ml-1" />
+												</div>
 											</div>
-										</div>
-									)
-								})}
+										)
+									})}
+								</div>
 							</div>
-						</div>
-					) : null}
+						) : null
+					})()}
 				</div>
 
 				<div
