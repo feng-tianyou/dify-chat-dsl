@@ -136,7 +136,7 @@ const useThinkTimer = (children: React.ReactNode) => {
 }
 
 interface ThinkBlockProps {
-  children: React.ReactNode
+  children?: React.ReactNode
   'data-think'?: boolean
   [key: string]: unknown
 }

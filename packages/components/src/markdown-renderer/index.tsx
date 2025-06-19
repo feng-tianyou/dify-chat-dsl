@@ -360,6 +360,7 @@ export function MarkdownRenderer(props: {
 					),
 					// @ts-expect-error FIXME: 类型错误待解决
 					script: ScriptBlock,
+					// @ts-expect-error FIXME: 类型错误待解决
 					details: ThinkBlock,
 					// @ts-expect-error FIXME: 类型错误待解决
 					img: ImageBlock,
