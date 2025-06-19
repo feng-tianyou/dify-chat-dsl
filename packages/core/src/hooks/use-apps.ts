@@ -64,6 +64,7 @@ const DEFAULT_APP_CONTEXT: IAppContext = {
 			opening_statement: '',
 			user_input_form: [],
 			suggested_questions: [],
+			hot_questions: [],
 			suggested_questions_after_answer: {
 				enabled: false,
 			},

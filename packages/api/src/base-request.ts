@@ -22,8 +22,9 @@ export class XRequest {
 		apiKey: string
 	}
 
-	async baseRequest(url: string, options: RequestInit) {
-		const result = await fetch(`${this.options.baseURL}${url}`, {
+	async baseRequest(url: string, options: RequestInit, isBK: boolean = false) {
+		const host = isBK ? 'https://bk-test.dslbuy.com' : this.options.baseURL
+		const result = await fetch(`${host}${url}`, {
 			...options,
 			headers: {
 				...options.headers,

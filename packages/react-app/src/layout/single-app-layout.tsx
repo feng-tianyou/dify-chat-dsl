@@ -47,6 +47,15 @@ const SingleAppLayout: React.FC = () => {
 			getAppParameters(difyApi),
 			getAppSiteSettting(difyApi),
 		])
+
+		const hotRequestion = await difyApi.getHotRequestion()
+		let hotQuestions: string[] = []
+		if (hotRequestion.code == '000000') {
+			hotQuestions = hotRequestion.data.map((item) => {
+				return item.title
+			})
+		}
+
 		// 获取应用信息
 		setCurrentApp({
 			config: {
@@ -58,7 +67,10 @@ const SingleAppLayout: React.FC = () => {
 					...appConfig.info,
 				},
 			},
-			parameters: appParameters,
+			parameters: {
+				...appParameters,
+				hot_questions: hotQuestions,
+			},
 			site: appSiteSetting,
 		})
 		setInitLoading(false)

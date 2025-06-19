@@ -59,6 +59,8 @@ export interface IDifyAppParameters {
 	 * 开场建议问题
 	 */
 	suggested_questions?: string[]
+
+	hot_questions?: string[]
 	/**
 	 * 下一轮问题建议
 	 */

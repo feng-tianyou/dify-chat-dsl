@@ -306,6 +306,17 @@ interface IGetConversationHistoryResponse {
 	data: IMessageItem[]
 }
 
+export interface IGetHotRequestionResponse {
+	code: string
+	message: string
+	data: {
+		id: number
+		knowledgeType: number
+		sort: number
+		title: string
+	}[]
+}
+
 export interface IDifyApiOptions {
 	/**
 	 * 用户
@@ -493,6 +504,23 @@ export class DifyApi {
 			user: this.options.user,
 			conversation_id,
 		}) as Promise<IGetConversationHistoryResponse>
+	}
+
+	/**
+	 * @description: 获取百科热点问题
+	 * @return {*}
+	 */	
+	getHotRequestion = async () => {
+		const response = await this.baseRequest.baseRequest(`/gateway/explore/app/hotQuestion/query`, {
+			method: 'POST',
+			body: JSON.stringify({
+				knowledgeType: 4,
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		}, true)
+		return response.json() as Promise<IGetHotRequestionResponse>
 	}
 
 	/**
