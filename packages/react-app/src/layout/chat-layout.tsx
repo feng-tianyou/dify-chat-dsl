@@ -27,6 +27,7 @@ import dayjs from 'dayjs'
 import { useSearchParams } from 'pure-react-router'
 import React, { useEffect, useMemo, useState, useRef, } from 'react'
 
+
 import {ChatboxWrapper} from '@/components/chatbox-wrapper'
 import { DEFAULT_CONVERSATION_NAME } from '@/constants'
 import { useLatest } from '@/hooks/use-latest'
@@ -80,6 +81,13 @@ export default function ChatLayout(props: IChatLayoutProps) {
 	// 用户的待确认选址地址,会传递给地图，地图显示该地址并显示确认弹窗
 	// 如使用 setNeedConfirmAddress('广州沙园')
 	const [needConfirmAddress, setNeedConfirmAddress] = useState<string>('')
+
+	// 🔧 辅助实例配置
+	const auxiliaryConfig = useMemo(() => ({
+		apiBase: difyApi.options.apiBase,
+		apiKey: difyApi.options.apiKey,
+		user: `${difyApi.options.user}-auxiliary`
+	}), [difyApi.options.apiBase, difyApi.options.apiKey, difyApi.options.user])
 
 	useEffect(() => {
 		if (!currentApp?.config) {
@@ -489,12 +497,14 @@ export default function ChatLayout(props: IChatLayoutProps) {
 							<div className="flex-1 min-w-0 flex overflow-hidden">
 								{/* 聊天窗口 */}
 								<div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-									<ChatboxWrapper
-										ref={chatboxRef}
-										difyApi={difyApi}
-										conversationListLoading={conversationListLoading}
-										onAddConversation={onAddConversation}
-										conversationItemsChangeCallback={() => getConversationItems(false)}
+																<ChatboxWrapper
+								ref={chatboxRef}
+								difyApi={difyApi}
+								conversationListLoading={conversationListLoading}
+								onAddConversation={onAddConversation}
+								conversationItemsChangeCallback={() => getConversationItems(false)}
+								// 🔥 启用辅助实例配置 - 使用与主实例相同的API密钥
+								auxiliaryConfig={auxiliaryConfig}
 									/>
 								</div>
 								{/* 地图组件 */}
@@ -522,6 +532,7 @@ export default function ChatLayout(props: IChatLayoutProps) {
 			</div>
 
 			{extComponents}
+
 		</ConversationsContextProvider>
 	)
 }

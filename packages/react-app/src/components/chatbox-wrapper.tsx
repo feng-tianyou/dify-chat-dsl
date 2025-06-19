@@ -5,12 +5,16 @@ import { Chatbox } from '@dify-chat/components'
 import { useAppContext } from '@dify-chat/core'
 import { Roles, useConversationsContext } from '@dify-chat/core'
 import { isTempId } from '@dify-chat/helpers'
-import { Button, Empty, Form, GetProp, Spin } from 'antd'
+import { Button, Empty, Form, GetProp, Spin, notification } from 'antd'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useRef, useState, forwardRef, useImperativeHandle, } from 'react'
 
 import { useLatest } from '@/hooks/use-latest'
 import { useX } from '@/hooks/useX'
+import { useAuxiliaryInstance } from '@/hooks/useAuxiliaryInstance'
+import { auxiliaryMessageProcessor } from '@/services/auxiliaryMessageProcessor'
+
+import { AuxiliaryMessageModal } from '@/components/auxiliary-message-modal'
 import workflowDataStorage from '@/hooks/useX/workflow-data-storage'
 
 interface IChatboxWrapperProps {
@@ -34,19 +38,28 @@ interface IChatboxWrapperProps {
 	 * 触发配置应用事件
 	 */
 	handleStartConfig?: () => void
+	/**
+	 * 辅助API配置（可选）
+	 */
+	auxiliaryConfig?: {
+		apiBase: string
+		apiKey: string
+		user?: string
+	}
 }
 
 /**
  * 聊天容器 进入此组件时, 应保证应用信息和对话列表已经加载完成
  */
 // export default function ChatboxWrapper(props: IChatboxWrapperProps) {
-export const ChatboxWrapper = forwardRef((props: IChatboxWrapperProps, ref) => {
+export const ChatboxWrapper = forwardRef<{ onSubmit: (content: string, options?: { files?: IFile[]; inputs?: Record<string, unknown> }) => void }, IChatboxWrapperProps>((props, ref) => {
 	const {
 		difyApi,
 		conversationListLoading,
 		onAddConversation,
 		conversationItemsChangeCallback,
 		handleStartConfig,
+		auxiliaryConfig,
 	} = props
 	const {
 		currentConversationId,
@@ -58,11 +71,7 @@ export const ChatboxWrapper = forwardRef((props: IChatboxWrapperProps, ref) => {
 
 	const [entryForm] = Form.useForm()
 	const abortRef = useRef(() => {})
-	useEffect(() => {
-		return () => {
-			abortRef.current()
-		}
-	}, [])
+	
 	// 是否允许消息列表请求时展示 loading
 	const [messagesloadingEnabled, setMessagesloadingEnabled] = useState(true)
 	const [initLoading, setInitLoading] = useState<boolean>(false)
@@ -79,6 +88,110 @@ export const ChatboxWrapper = forwardRef((props: IChatboxWrapperProps, ref) => {
 	})
 
 	const filesRef = useRef<IFile[]>([])
+
+	// 初始化辅助实例
+	const {
+		sendAuxiliaryMessage,
+		onMessage,
+		onError,
+		cancelAllAuxiliaryRequests
+	} = useAuxiliaryInstance(auxiliaryConfig)
+
+	// 🔥 组件生命周期管理
+	useEffect(() => {
+		return () => {
+			abortRef.current()
+			// 组件卸载时取消所有辅助请求
+			if (cancelAllAuxiliaryRequests) {
+				cancelAllAuxiliaryRequests()
+			}
+		}
+	}, [cancelAllAuxiliaryRequests])
+
+	// 🎯 弹窗状态管理
+	const [auxiliaryModalVisible, setAuxiliaryModalVisible] = useState(false)
+	const [currentAuxiliaryMessage, setCurrentAuxiliaryMessage] = useState<{
+		query: string
+		content: string
+		timestamp: number
+		conversationId?: string
+	} | null>(null)
+
+
+
+	// 🔥 注册辅助消息处理器
+	useEffect(() => {
+		if (!auxiliaryConfig) return
+
+		const unsubscribeMessage = onMessage(async (message) => {
+			// 设置当前消息并显示弹窗
+			setCurrentAuxiliaryMessage({
+				query: message.query,
+				content: message.content,
+				timestamp: message.timestamp,
+				conversationId: message.conversationId
+			})
+			setAuxiliaryModalVisible(true)
+			
+			// 显示通知提醒
+			notification.info({
+				message: '🤖 辅助分析完成',
+				description: '点击查看完整的AI分析结果',
+				placement: 'topRight',
+				duration: 3,
+				onClick: () => {
+					setAuxiliaryModalVisible(true)
+				}
+			})
+			
+			// 使用处理器管理器处理消息
+			const results = await auxiliaryMessageProcessor.processMessage(message)
+			
+			// 根据处理结果执行相应的业务逻辑
+			handleAuxiliaryProcessResults(results, message)
+		})
+
+		const unsubscribeError = onError((error, query) => {
+			console.error('❌ 辅助消息错误:', { error, query })
+		})
+
+		return () => {
+			unsubscribeMessage()
+			unsubscribeError()
+		}
+	}, [auxiliaryConfig, onMessage, onError])
+
+	/**
+	 * 处理辅助消息的处理结果
+	 */
+	const handleAuxiliaryProcessResults = useCallback((results: unknown[], _message: unknown) => {
+		for (const result of results) {
+			const processResult = result as { processor: string; success: boolean; data: unknown }
+			switch (processResult.processor) {
+				case 'addressRecognition':
+					if (processResult.success && (processResult.data as { hasAddress: boolean }).hasAddress) {
+						// 可以触发地址相关的业务逻辑
+					}
+					break
+					
+				case 'intentAnalysis':
+					if (processResult.success) {
+						// 根据意图执行不同的业务逻辑
+					}
+					break
+					
+				case 'keywordExtraction':
+					if (processResult.success) {
+						// 可以用于搜索推荐、内容过滤等
+					}
+					break
+					
+				default:
+					// 其他处理器的结果
+					break
+			}
+		}
+	}, [])
 
 	/**
 	 * 获取下一轮问题建议
@@ -246,14 +359,41 @@ export const ChatboxWrapper = forwardRef((props: IChatboxWrapperProps, ref) => {
 	const onSubmit = useCallback(
 		(nextContent: string, options?: { files?: IFile[]; inputs?: Record<string, unknown> }) => {
 			filesRef.current = options?.files || []
-			nextContent = formatNextContent(nextContent)
+			const formattedContent = formatNextContent(nextContent)
+			
+			// 1. 发送主消息（正常流程，会上屏显示）
 			onRequest({
-				content: nextContent,
+				content: formattedContent,
 				files: options?.files as IMessageFileItem[],
 			})
+
+			// 如果配置了辅助实例，则发送辅助消息进行分析（不上屏）
+			if (auxiliaryConfig && sendAuxiliaryMessage) {
+				// 生成辅助查询内容
+				const auxiliaryQuery = generateAuxiliaryQuery(nextContent)
+				
+				// 异步发送辅助消息（不阻塞主流程）
+				setTimeout(() => {
+					sendAuxiliaryMessage({
+						query: auxiliaryQuery,
+						conversationId: undefined, // 辅助消息使用独立对话
+						inputs: entryForm.getFieldsValue(),
+						files: options?.files || []
+					}).catch(error => {
+						console.warn('辅助消息发送失败:', error)
+					})
+				}, 200) // 稍微延迟，确保主消息先发送
+			}
 		},
-		[onRequest],
+		[onRequest, auxiliaryConfig, sendAuxiliaryMessage, entryForm],
 	)
+
+	/**
+	 * 生成辅助查询内容
+	 */
+	const generateAuxiliaryQuery = useCallback((originalContent: string) => {		
+		return `请识别用户问题是否有包含地址:${originalContent}`
+	}, [])
 
 	// 暴露 onSubmit 给父组件
 	useImperativeHandle(ref, () => ({
@@ -262,15 +402,7 @@ export const ChatboxWrapper = forwardRef((props: IChatboxWrapperProps, ref) => {
 
 	// 格式化用户输入的内容
 	const formatNextContent = (nextContent: string) => {
-		console.log('options===============', nextContent)
-		//请识别用户问题是否有包含地址:
-		let nextContentResult = `请识别用户问题是否有包含地址:${nextContent}`
-		if (nextContent.indexOf('帮我进行门店选址') != -1) {
-			// 已经确定了具体的地址
-			return nextContent
-		} else {
-			return nextContentResult
-		}
+		return nextContent
 	}
 
 	const unStoredMessages4Render = useMemo(() => {
@@ -328,6 +460,7 @@ export const ChatboxWrapper = forwardRef((props: IChatboxWrapperProps, ref) => {
 
 	return (
 		<div className="flex h-screen flex-col overflow-hidden flex-1">
+
 			<div className="flex-1 overflow-hidden relative">
 				{initLoading ? (
 					<div className="absolute w-full h-full left-0 top-0 z-50 flex items-center justify-center">
@@ -373,6 +506,21 @@ export const ChatboxWrapper = forwardRef((props: IChatboxWrapperProps, ref) => {
 					</div>
 				)}
 			</div>
+			
+
+			
+			{/* 🎯 辅助消息弹窗 */}
+			<AuxiliaryMessageModal
+				visible={auxiliaryModalVisible}
+				message={currentAuxiliaryMessage}
+				onClose={() => {
+					setAuxiliaryModalVisible(false)
+					setCurrentAuxiliaryMessage(null)
+				}}
+				title="🤖 辅助分析完整结果"
+			/>
 		</div>
 	)
 })
+
+ChatboxWrapper.displayName = 'ChatboxWrapper'
