@@ -250,7 +250,7 @@ export const Chatbox = (props: ChatboxProps) => {
 	return (
 		<div className="w-full h-full overflow-hidden my-0 mx-auto box-border flex flex-col gap-4 relative">
 			<div
-				className="w-full h-full overflow-auto pt-4 pb-48"
+				className="w-full h-full overflow-auto pt-4 pb-48 m-chat-box-content"
 				ref={scrollContainerRef}
 			>
 				{/* 🌟 欢迎占位 + 对话参数 */}
@@ -264,7 +264,7 @@ export const Chatbox = (props: ChatboxProps) => {
 					uploadFileApi={(...params) => difyApi.uploadFile(...params)}
 				/>
 
-				<div className="flex-1 w-full max-w-4xl mx-auto px-3 md:px-6 box-border">
+				<div className="flex-1 w-full max-w-3xl mx-auto px-3 md:px-6 box-border">
 					{/* 🌟 消息列表 */}
 					<Bubble.List
 						items={items}
@@ -320,7 +320,7 @@ export const Chatbox = (props: ChatboxProps) => {
 				</div>
 
 				<div
-					className="absolute bottom-0 bg-theme-main-bg w-full max-w-4xl left-1/2"
+					className="absolute bottom-0 bg-theme-main-bg w-full max-w-3xl left-1/2"
 					style={{
 						transform: 'translateX(-50%)',
 					}}
