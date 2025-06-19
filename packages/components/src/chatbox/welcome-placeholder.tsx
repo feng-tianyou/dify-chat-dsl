@@ -59,13 +59,7 @@ export const WelcomePlaceholder = (props: IWelcomePlaceholderProps) => {
 
 	const placeholderPromptsItems: GetProp<typeof Prompts, 'items'> = useMemo(() => {
 		// 写死的开场建议问题 - 临时禁用以排查问题
-		const defaultSuggestions: string[] = [
-			'你好，请介绍一下你自己',
-			'你能帮我做什么？',
-			'请告诉我你的功能特点',
-			'如何使用你的服务？',
-			'你有什么特别的能力吗？'
-		]
+		const defaultSuggestions: string[] = currentApp?.parameters?.hot_questions || []
 
 		// 优先使用写死的问题，如果需要也可以保留原有的动态问题作为备选
 		const suggestions = defaultSuggestions.length > 0 
