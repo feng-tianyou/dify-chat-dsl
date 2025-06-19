@@ -11,7 +11,6 @@ import './App.css'
 import LayoutIndex from './layout'
 import AppListPage from './pages/app-list'
 import ChatPage from './pages/chat'
-import MapPage from './pages/map'
 import DifyAppService from './services/app/localstorage'
 
 // 初始化响应式配置
@@ -21,7 +20,6 @@ const routes: IRoute[] = [
 	{ path: '/chat', component: () => <ChatPage /> },
 	{ path: '/app/:appId', component: () => <ChatPage /> },
 	{ path: '/apps', component: () => <AppListPage /> },
-	{ path: '/map', component: () => <MapPage /> },
 ]
 
 /**

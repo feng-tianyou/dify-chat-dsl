@@ -1,8 +1,10 @@
-import { Button, Card, Input, message, Space } from 'antd'
-import { memo, useState, useImperativeHandle, forwardRef, useCallback } from 'react'
+import { Button, message, } from 'antd'
+import { forwardRef, memo, useCallback, useImperativeHandle, useRef, useState } from 'react'
 
 import AMapComponent from '@/components/amap-component'
 import { IMapConfig, IMapMarker } from '@/types'
+
+import './map-layout.css'
 
 export interface MapLayoutRef {
 	onConfigPoi: (longitude: number, latitude: number) => void
@@ -19,39 +21,29 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 	const [mapConfig, setMapConfig] = useState<IMapConfig>({
 		apiKey: 'b228b9ebcb41e5a9320bcfc45ad0b5c8', // 需要用户提供高德地图 API Key
 		containerId: 'amap-container',
-		center: [116.397428, 39.90923], // 默认北京
+		center: [113.203299, 23.073685], // 默认大参林副中心
 		zoom: 11,
 		mapStyle: 'amap://styles/light',
 	})
 
-	const [markers, setMarkers] = useState<IMapMarker[]>([])
-	const [mapInstance, setMapInstance] = useState<any>(null)
-	const [circleInstance, setCircleInstance] = useState<any>(null)
+	const mapInstanceRef = useRef<any>(null)
 
-	const [newMarker, setNewMarker] = useState<{
-		title: string
-		content: string
-		position: [number, number]
-	}>({
-		title: '',
-		content: '',
-		position: [116.397428, 39.90923],
-	})
+	const [showConfign, setShowConfign] = useState<boolean>(false)
+
+	// const [poiInstance, setPoiInstance] = useState<IMapConfig>({
+	// 	apiKey: 'b228b9ebcb41e5a9320bcfc45ad0b5c8', // 需要用户提供高德地图 API Key
+	// 	containerId: 'amap-container',
+	// 	center: [113.203299, 23.073685], // 默认大参林副中心
+	// 	zoom: 11,
+	// 	mapStyle: 'amap://styles/light',
+	// })
 
 	/**
 	 * 处理地图加载完成
 	 */
 	const handleMapLoaded = useCallback((map: any) => {
 		console.log('地图加载完成:', map)
-		setMapInstance(map)
-	}, [])
-
-	/**
-	 * 处理标记点点击
-	 */
-	const handleMarkerClick = useCallback((marker: IMapMarker) => {
-		console.log('点击标记点:', marker)
-		message.info(`点击了: ${marker.title}`)
+		mapInstanceRef.current = map
 	}, [])
 
 	/**
@@ -59,63 +51,134 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 	 */
 	const handleMapClick = useCallback((position: [number, number]) => {
 		console.log('地图点击位置:', position)
-		// setNewMarker(prev => ({
-		// 	...prev,
-		// 	position
-		// }))
+		getAddressByLngAndLat(position[0], position[1])
 	}, [])
+
+	/**
+	 * 点击确认地址弹窗
+	 */
+	const onConfign = () => {
+		setShowConfign(false)
+		// todo, 调用外部发送信息函数，发送提问: 帮我进行门店选址，地址是：xxx，经纬度是：xxx。
+
+	}
+
+	/**
+	 * 提供给外部调用！！
+	 * 根据地址获取经纬度，然后再根据经纬度获取地址添加标识到地图
+	 * 为何要再根据经纬度获取地址添加到地图呢，因为这个函数的地址可能是一个范围
+	 */
+	const addAddressToMap = (address: string) => {
+		const geocoder = new (window as any).AMap.Geocoder({
+			radius: 500,
+			extensions: 'base',
+		})
+		geocoder.getLocation(address, (status: string, result: any) => {
+			console.log('根据给定的地址描述进行解析:', status, result)
+			if (status === 'complete' && result.info === 'OK') {
+				if(result.geocodes && result.geocodes.length > 0) {
+					let realGeocode = result.geocodes[0]
+					getAddressByLngAndLat(realGeocode.location.lng, realGeocode.location.lat)
+				} else {
+					message.error(`${address}无法获得经纬度,请输入更精准描述，感谢。`, 3);
+				}
+			}
+		})
+	}
+
+	/**
+	 * 逆地理编码获取地址并添加标识到地图
+	 */
+	const getAddressByLngAndLat = (lng: number, lat: number) => {
+		const geocoder = new (window as any).AMap.Geocoder({
+			radius: 500,
+			extensions: 'base',
+		})
+		geocoder.getAddress([lng, lat], (status: string, result: any) => {
+			console.log('逆地理编码结果:', status, result)
+			if (status === 'complete' && result.info === 'OK') {
+				const address =
+					result.regeocode.addressComponent.street + result.regeocode.addressComponent.streetNumber
+				console.log('地址描述:', address)
+				// 添加poi标识到地图
+				onConfigPoi(address, lng, lat)
+				// 显示确认选址弹窗
+				setShowConfign(true)
+			}
+		})
+	}
 
 	/**
 	 * 配置POI点：居中地图、清除标记点、添加500米半径圆环
 	 */
-	const onConfigPoi = useCallback((longitude: number, latitude: number) => {
-		if (!mapInstance) {
-			console.warn('地图实例未初始化')
-			return
-		}
-
-		try {
-			// 1. 清除所有标记点
-			setMarkers([])
-
-			// 2. 清除之前的圆环
-			if (circleInstance) {
-				mapInstance.remove(circleInstance)
-				setCircleInstance(null)
+	const onConfigPoi = useCallback(
+		(address: string, longitude: number = 0, latitude: number = 0) => {
+			if (!mapInstanceRef.current) {
+				console.warn('地图实例未初始化')
+				return
 			}
 
-			// 3. 地图居中到指定位置
-			mapInstance.setCenter([longitude, latitude])
-			
-			// 4. 调整缩放级别以显示500米半径
-			mapInstance.setZoom(16) // 大约500米视野的缩放级别
+			try {
+				console.log('---调用添加poi点---')
+				// 清除之前的圆环、marker
+				mapInstanceRef.current.clearMap()
+				// 地图居中到指定位置
+				mapInstanceRef.current.setCenter([longitude, latitude])
+				// 调整缩放级别以显示500米半径
+				mapInstanceRef.current.setZoom(14)
+				// 添加500米半径的圆环
+				const circle = new (window as any).AMap.Circle({
+					center: [longitude, latitude],
+					radius: 500, // 500米半径
+					strokeColor: '#1890ff',
+					strokeWeight: 2,
+					strokeOpacity: 0.8,
+					fillColor: '#1890ff',
+					fillOpacity: 0.1,
+					strokeStyle: 'dashed',
+				})
 
-			// 5. 添加500米半径的圆环
-			const circle = new (window as any).AMap.Circle({
-				center: [longitude, latitude],
-				radius: 500, // 500米半径
-				strokeColor: '#1890ff',
-				strokeWeight: 2,
-				strokeOpacity: 0.8,
-				fillColor: '#1890ff',
-				fillOpacity: 0.1,
-				strokeStyle: 'solid'
-			})
+				mapInstanceRef.current.add(circle)
 
-			mapInstance.add(circle)
-			setCircleInstance(circle)
+				// 添加一个marker
+				const contentElement = document.createElement('div')
+				contentElement.className = 'poi-content'
+				contentElement.innerHTML = `
+				  <div class="marker-poi-text">${address}</div>
+					<svg xmlns="http://www.w3.org/2000/svg" width="6" height="20" viewBox="0 0 6 20" fill="none">
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M3 20C2.43231 20 1.95698 19.5698 1.9005 19.005L0 0H6L4.0995 19.005C4.04302 19.5698 3.56769 20 3 20Z" fill="url(#paint0_linear_33_10)"/>
+						<defs>
+						<linearGradient id="paint0_linear_33_10" x1="3" y1="-1.05263" x2="3" y2="9.47368" gradientUnits="userSpaceOnUse">
+						<stop stop-color="#1D2129"/>
+						<stop offset="1" stop-color="#4E5969"/>
+						</linearGradient>
+						</defs>
+					</svg>
+			`
+				const marker = new (window as any).AMap.Marker({
+					position: [longitude, latitude],
+					content: contentElement,
+					offset: new (window as any).AMap.Pixel(0, 0), //设置点标记偏移量
+  				anchor: "bottom-center", //设置锚点方位
+				})
+				mapInstanceRef.current.add(marker)
 
-			console.log(`地图已配置到位置: ${longitude}, ${latitude}`)
-		} catch (error) {
-			console.error('配置POI失败:', error)
-			message.error('配置POI失败')
-		}
-	}, [mapInstance, circleInstance])
+				console.log(`地图已配置到位置: ${longitude}, ${latitude}`)
+			} catch (error) {
+				console.error('配置POI失败:', error)
+			}
+		},
+		[mapInstanceRef.current],
+	)
 
 	// 暴露方法给父组件
-	useImperativeHandle(ref, () => ({
-		onConfigPoi
-	}), [onConfigPoi])
+	useImperativeHandle(
+		ref,
+		() => ({
+			onConfigPoi,
+		}),
+		[onConfigPoi],
+	)
 
 	return (
 		<div
@@ -131,16 +194,21 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 			{/* 主要内容区域 */}
 			<div
 				className="flex-1 overflow-hidden flex bg-theme-main-bg"
-				style={{ borderRadius: '14px', margin: '10px' }}
+				style={{ position: 'relative', borderRadius: '14px', margin: '10px' }}
 			>
+				{/* 地图 */}
 				<AMapComponent
 					config={mapConfig}
-					markers={markers}
 					onMapLoaded={handleMapLoaded}
-					onMarkerClick={handleMarkerClick}
 					onMapClick={handleMapClick}
 					className="w-full h-full"
 				/>
+				{/* 确认弹窗 */}
+				{showConfign && <div className="popup-confign-content">
+					<span>上面的地址是否是你属意的门店选址地址？</span>
+					<span>拖动地图点击任何一处可以切换新地址。</span>
+					<Button type="primary" autoInsertSpace={false} onClick={onConfign}>确定</Button>
+				</div>}
 			</div>
 		</div>
 	)
