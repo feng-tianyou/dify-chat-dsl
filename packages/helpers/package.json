@@ -1,6 +1,6 @@
 {
 	"name": "@dify-chat/helpers",
-	"description": "Dify Chat 的辅助工具包",
+	"description": "门店选址决策助手",
 	"version": "0.3.0",
 	"type": "module",
 	"author": {

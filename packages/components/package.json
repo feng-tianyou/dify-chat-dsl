@@ -1,7 +1,7 @@
 {
 	"name": "@dify-chat/components",
 	"version": "0.3.0",
-	"description": "Dify Chat Components library",
+	"description": "门店选址决策助手",
 	"keywords": [
 		"dify",
 		"chat",
