@@ -510,7 +510,7 @@ export default function ChatLayout(props: IChatLayoutProps) {
 								{/* 地图组件 */}
 								<div className="flex-shrink-0" style={{ width: '28.5vw' }}>
 									<MapLayout needConfirmAddress={needConfirmAddress} onSendConfirmAddress={(poi: IPoi) => {
-										// todo,这里发送信息
+										// 这里发送信息确定选址，让ai评估选址
 										if (chatboxRef.current) {
 											chatboxRef.current.onSubmit(
 												`帮我进行门店选址，地址是：${poi.address}，经纬度是：${poi.lng},${poi.lat}。`

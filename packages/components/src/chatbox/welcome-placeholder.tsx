@@ -113,8 +113,8 @@ export const WelcomePlaceholder = (props: IWelcomePlaceholderProps) => {
 						description="问答式选址智能体，功能包括：根据输入的地址，分析商圈人流情况，估算租金/坪效比计算等因素，给出是否建议开店结论"
 						extra={
 							<Space>
-								<Button icon={<ShareAltOutlined />} />
-								<Button icon={<EllipsisOutlined />} />
+								{/* <Button icon={<ShareAltOutlined />} />
+								<Button icon={<EllipsisOutlined />} /> */}
 							</Space>
 						}
 					/>

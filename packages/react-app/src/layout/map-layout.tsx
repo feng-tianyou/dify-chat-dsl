@@ -217,8 +217,8 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 				{/* 确认弹窗 */}
 				{showConfirm && <div className="popup-confign-content">
 					<span>上面的地址是否是你属意的门店选址地址？</span>
-					<span>拖动地图点击任何一处可以切换新地址。</span>
-					<Button type="primary" autoInsertSpace={false} onClick={onConfirm}>确定</Button>
+					<span style={{marginTop: '5px', }}>拖动地图点击任何一处可以切换新地址。</span>
+					<Button type="primary" style={{marginTop: '10px', }} autoInsertSpace={false} onClick={onConfirm}>确定</Button>
 				</div>}
 			</div>
 		</div>
