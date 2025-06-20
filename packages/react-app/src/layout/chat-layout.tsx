@@ -793,7 +793,7 @@ export default function ChatLayout(props: IChatLayoutProps) {
 									/>
 								</div>
 								{/* 地图组件 */}
-								<div className="flex-shrink-0" style={{ width: '28.5vw' }}>
+								<div className="flex-shrink-0" style={{ width: '30vw' }}>
 									<MapLayout heatmapData={heatmapData} needConfirmAddress={needConfirmAddress} onSendConfirmAddress={(poi: IPoi) => {
 										// 这里发送信息确定选址，让ai评估选址
 										if (chatboxRef.current) {
