@@ -374,7 +374,7 @@ export const ChatboxWrapper = forwardRef<{ onSubmit: (content: string, options?:
 			})
 
 			// 如果配置了辅助实例，则发送辅助消息进行分析（不上屏）
-			if (auxiliaryConfig && sendAuxiliaryMessage) {
+			if (auxiliaryConfig && sendAuxiliaryMessage && !nextContent.includes('帮我进行门店选址，地址是')) {
 				// 生成辅助查询内容
 				const auxiliaryQuery = generateAuxiliaryQuery(nextContent)
 				
