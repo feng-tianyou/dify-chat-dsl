@@ -11,11 +11,15 @@ export interface MapLayoutRef {
 	onConfigPoi: (longitude: number, latitude: number) => void
 }
 
+type HeatmapPoint = { lng: number; lat: number; count: number }
+
 interface MapLayoutProps {
 	// 待用户点击确定的选址地址
 	needConfirmAddress?: string,
 	// 回调函数，通知父亲组件发送确认选址的信息
 	onSendConfirmAddress: (poi: IPoi) => void
+	// 热力地图数据
+	heatmapData?:HeatmapPoint[]
 }
 
 /**
@@ -260,6 +264,7 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 			>
 				{/* 地图 */}
 				<AMapComponent
+					heatmapData={props.heatmapData}
 					config={mapConfig}
 					onMapLoaded={handleMapLoaded}
 					onMapClick={handleMapClick}

@@ -7,10 +7,11 @@ import { IMapComponentProps } from '@/types'
  * 高德地图组件
  */
 export default function AMapComponent(props: IMapComponentProps) {
-	const { config, markers = [], onMapLoaded, onMarkerClick, onMapClick, className, style } = props
+	const { config, markers = [],heatmapData = [], onMapLoaded, onMarkerClick, onMapClick, className, style } = props
 	const mapRef = useRef<any>(null)
 	const mapContainerRef = useRef<HTMLDivElement>(null)
 	const markersRef = useRef<any[]>([])
+	const heatMapRef = useRef<any>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
@@ -33,7 +34,7 @@ export default function AMapComponent(props: IMapComponentProps) {
 				const AMap = await AMapLoader.load({
 					key: config.apiKey,
 					version: '2.0',
-					plugins: ['AMap.Geolocation', 'AMap.Scale', 'AMap.ToolBar', 'AMap.Geocoder']
+					plugins: ['AMap.Geolocation', 'AMap.Scale', 'AMap.ToolBar', 'AMap.Geocoder','AMap.HeatMap']
 				})
 
 				// 创建地图实例
@@ -46,6 +47,14 @@ export default function AMapComponent(props: IMapComponentProps) {
 				// 添加地图控件
 				map.addControl(new AMap.Scale())
 				map.addControl(new AMap.ToolBar())
+
+				// 创建热力图插件
+				const heatmap = new AMap.HeatMap(map, {
+					radius: 25, //给定半径
+            		opacity: [0, 0.8]
+				})
+				// 热力图插件
+				heatMapRef.current = heatmap
 
 				// 保存地图实例
 				mapRef.current = map
@@ -136,6 +145,17 @@ export default function AMapComponent(props: IMapComponentProps) {
 			mapRef.current.setBounds(bounds)
 		}
 	}, [markers])
+
+	// 更新热力图
+	useEffect(() => {
+		if (heatMapRef.current && heatmapData.length > 0) {
+			heatMapRef.current.setDataSet({
+				data:heatmapData,
+				max:100
+			})
+			heatMapRef.current.show()
+		}
+	}, [heatmapData])
 
 	return (
 		<div className={`relative ${className || ''}`} style={style}>
