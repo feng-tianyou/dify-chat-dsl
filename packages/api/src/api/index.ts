@@ -537,15 +537,9 @@ export class DifyApi {
 	 * @description: 获取热力图数据
 	 * @return {*}
 	 */	
-	getHeatMapData = async () => {
-		const response = await this.baseRequest.baseRequest(`/gateway/explore/app/hotQuestion/query`, {
-			method: 'POST',
-			body: JSON.stringify({
-				knowledgeType: 4,
-			}),
-			headers: {
-				'Content-Type': 'application/json',
-			},
+	getHeatMapData = async (latitude:number, longitude:number, circle:number) => {
+		const response = await this.baseRequest.baseRequest(`/gateway/competitor/codeCompetition/locationPoint/byPoint?latitude=${latitude}&longitude=${longitude}&circle=${circle}`, {
+			method: 'GET',
 		}, true)
 		return response.json() as Promise<IGetHeatMapResponse>
 	}
