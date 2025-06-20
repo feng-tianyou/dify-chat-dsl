@@ -145,7 +145,7 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 		const res = await difyApi.getStoreMarker({
 			longitude: lng,
 			latitude: lat,
-			radius: 5000,
+			radius: 1500,
 		})
 		console.log('获取门店数据:', res)
 		if (res.code != '000000') {
