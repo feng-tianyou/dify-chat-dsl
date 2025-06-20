@@ -48,7 +48,7 @@
   left: 50%;
   transform: translateX(-50%);
   bottom: 120px;
-  width: calc(28.5vw - 60px);
+  width: calc(32vw - 60px);
   display: flex;
   flex-direction: column;
   justify-content: center;

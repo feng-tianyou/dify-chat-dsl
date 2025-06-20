@@ -269,7 +269,7 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 		<div
 			className="w-full h-full flex flex-col overflow-hidden bg-theme-bg"
 			style={{
-				width: '28.5vw',
+				width: '32vw',
 				backgroundColor: '#fff',
 				borderWidth: '1px',
 				borderStyle: 'solid',
