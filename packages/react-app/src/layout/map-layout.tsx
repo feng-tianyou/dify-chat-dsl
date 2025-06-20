@@ -11,15 +11,11 @@ export interface MapLayoutRef {
 	onConfigPoi: (longitude: number, latitude: number) => void
 }
 
-type HeatmapPoint = { lng: number; lat: number; count: number }
-
 interface MapLayoutProps {
 	// 待用户点击确定的选址地址
 	needConfirmAddress?: string,
 	// 回调函数，通知父亲组件发送确认选址的信息
 	onSendConfirmAddress: (poi: IPoi) => void
-	// 热力地图数据
-	heatmapData?:HeatmapPoint[]
 }
 
 /**
@@ -42,6 +38,10 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 			apiKey: '',
 		}),
 	)
+
+	// 热力图数据
+	type HeatmapPoint = { lng: number; lat: number; count: number }
+	const [heatmapData, setHeatmapData] = useState<HeatmapPoint[]>([])
 
 	const mapInstanceRef = useRef<any>(null)
 
@@ -135,8 +135,27 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 				setShowConfirm(true)
 				// TODO: 调用接口查询周边门店数据
 				addStoreMarker(lng, lat)
+				// 热力图数据
+				fetchHeatMapData(lat,lng,1000)
 			}
 		})
+	}
+
+	const fetchHeatMapData = async (latitude:number, longitude:number, circle:number) => {
+		console.log('==================',latitude)
+		const heatMapRes = await difyApi.getHeatMapData(latitude, longitude, circle)
+		let heatMaps: any[] = []
+		if (heatMapRes.code == '000000') {
+			heatMaps = heatMapRes.data.map((item) => {
+				return {
+					...item,
+					lat:item.latitude,
+					lng:item.longitude,
+
+				}
+			})
+		}
+		setHeatmapData(heatMaps)
 	}
 
 	const addStoreMarker = async (lng: number, lat: number) => {
@@ -145,7 +164,7 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 		const res = await difyApi.getStoreMarker({
 			longitude: lng,
 			latitude: lat,
-			radius: 1500,
+			radius: 1000,
 		})
 		console.log('获取门店数据:', res)
 		if (res.code != '000000') {
@@ -264,7 +283,7 @@ function MapLayout(props: MapLayoutProps, ref: React.Ref<MapLayoutRef>) {
 			>
 				{/* 地图 */}
 				<AMapComponent
-					heatmapData={props.heatmapData}
+					heatmapData={heatmapData}
 					config={mapConfig}
 					onMapLoaded={handleMapLoaded}
 					onMapClick={handleMapClick}
