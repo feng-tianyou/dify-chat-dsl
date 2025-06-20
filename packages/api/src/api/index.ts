@@ -317,6 +317,16 @@ export interface IGetHotRequestionResponse {
 	}[]
 }
 
+export interface IGetHeatMapResponse {
+	code: string
+	message: string
+	data: {
+		lng:number
+		lat:number,
+		count:number
+	}[]
+}
+
 export interface IDifyApiOptions {
 	/**
 	 * 用户
@@ -521,6 +531,23 @@ export class DifyApi {
 			},
 		}, true)
 		return response.json() as Promise<IGetHotRequestionResponse>
+	}
+
+	/**
+	 * @description: 获取热力图数据
+	 * @return {*}
+	 */	
+	getHeatMapData = async () => {
+		const response = await this.baseRequest.baseRequest(`/gateway/explore/app/hotQuestion/query`, {
+			method: 'POST',
+			body: JSON.stringify({
+				knowledgeType: 4,
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		}, true)
+		return response.json() as Promise<IGetHeatMapResponse>
 	}
 
 	/**

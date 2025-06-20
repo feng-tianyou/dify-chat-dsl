@@ -97,6 +97,8 @@ export interface IMapComponentProps {
 	 * 地图配置
 	 */
 	config: IMapConfig
+	
+	heatmapData?: []
 	/**
 	 * 地图加载完成回调
 	 */
