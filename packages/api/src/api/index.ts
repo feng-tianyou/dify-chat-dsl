@@ -317,6 +317,19 @@ export interface IGetHotRequestionResponse {
 	}[]
 }
 
+export interface IGetStoreMarkerResponse {
+	code: string
+	message: string
+	data: {
+		flatEffect: number
+		latitude: number
+		longitude: number
+		rent: number
+		storeCode: string
+		storeName: string
+	}[]
+}
+
 export interface IDifyApiOptions {
 	/**
 	 * 用户
@@ -521,6 +534,21 @@ export class DifyApi {
 			},
 		}, true)
 		return response.json() as Promise<IGetHotRequestionResponse>
+	}
+
+	getStoreMarker = async (params: {
+		longitude: number
+		latitude: number
+		radius: number
+	}) => {
+		const response = await this.baseRequest.baseRequest(`/gateway/competitor/codeCompetition/getDslStoreInfoByRadius?longitude=${params.longitude}&latitude=${params.latitude}&radius=${params.radius}`, {
+			method: 'GET',
+			headers: {
+				// 'Content-Type': 'application/json',
+				app_token: '9_75da195ddcde458f9bc10da33625ec27',
+			},
+		}, true)
+		return response.json() as Promise<IGetStoreMarkerResponse>
 	}
 
 	/**
